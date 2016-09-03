@@ -7,6 +7,7 @@ also act like load balancer for your public services thanks to consul.
 
 Usage
 
+```
 docker run \
     -e CERTS=my.domain,my.other.domain \
     -e EMAIL=my.email@my.domain \
@@ -15,7 +16,7 @@ docker run \
     -v /etc/letsencrypt:/etc/letsencrypt \
     -p 80:80 -p 443:443 -p 1936:1936\
     nebtex/haproxy-public
-    
+```    
     
 based on https://github.com/BradJonesLLC/docker-haproxy-letsencrypt
 and https://github.com/CiscoCloud/haproxy-consul
