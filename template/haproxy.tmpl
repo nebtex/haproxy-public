@@ -1,0 +1,69 @@
+global
+    maxconn 256
+    lua-load /usr/local/etc/haproxy/acme-http01-webroot.lua
+    chroot /jail
+    ssl-default-bind-ciphers AES256+EECDH:AES256+EDH:!aNULL;
+    tune.ssl.default-dh-param 4096
+
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option forwardfor
+    option http-server-close
+
+frontend http
+    bind *:80
+    mode http
+    acl url_acme_http01 path_beg /.well-known/acme-challenge/
+    http-request use-service lua.acme-http01 if METH_GET url_acme_http01
+    redirect scheme https code 301 if !{ ssl_fc }
+
+### HTTP(S) frontend ###
+frontend https
+    bind *:443 ssl crt /usr/local/etc/haproxy/certs/ no-sslv3 no-tls-tickets no-tlsv10 no-tlsv11
+    rspadd Strict-Transport-Security:\ max-age=15768000
+    reqadd X-Forwarded-Proto:\ https if { ssl_fc }
+    # Generated automatically by consul-template
+{{ range services }}
+  {{if .Tags | contains "http" }}{{if .Tags | contains "public" }}
+    acl host_{{ .Name }} hdr_beg(host) -i {{ or (env "APP_PREFIX") "" }}{{ if (env "APP_PREFIX") }}-{{end}}{{ .Name }}.{{ or (env "APP_DOMAIN") "public-proxy.service.consul" }}
+    use_backend {{ .Name }}_backend if host_{{ .Name }}
+  {{ end }}{{ end }}
+{{ end }}
+
+
+{{ if env "HAPROXY_STATS" }}
+frontend stats
+    bind *:1936
+    mode http
+    use_backend stats
+{{ end }}
+
+
+### Consul-configured backend services ###
+{{ range services }}
+{{if .Tags | contains "public" }}
+backend {{ .Name }}_backend
+{{ if .Tags.Contains "tcp" }}
+   mode tcp
+{{else}}
+   mode http
+{{ end }}
+{{ range service .Name }}
+   server {{ .Node }}-{{ .Port }} {{ .Address }}:{{ .Port }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+{{ if env "HAPROXY_STATS" }}
+
+backend stats
+    stats enable
+    stats hide-version
+    stats refresh 5s
+    stats scope .
+    stats realm {{ or (env "HAPROXY_STATS_TITLE") "Haproxy Statistics" }}
+    stats uri {{ or (env "HAPROXY_STATS_URI") "/" }}
+{{ end }}
