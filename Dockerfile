@@ -79,7 +79,6 @@ RUN cd / && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/hapro
 	&& rm -rf /usr/src/haproxy
 
 COPY docker-entrypoint.sh /
-ADD regenerate_consul_template.sh /
 ADD reload.sh /
 RUN chmod +x reload.sh
 
