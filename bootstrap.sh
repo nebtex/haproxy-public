@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-/certs.sh && /regenerate_consul_template.sh && supervisord -n
+/certs.sh
+rm /usr/local/etc/haproxy/haproxy.cfg
+supervisord -n
