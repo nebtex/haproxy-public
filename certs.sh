@@ -6,12 +6,4 @@ if [ -n "$CERTS" ]; then
         -d "$CERTS" --keep --agree-tos --email "$EMAIL" \
         || exit 1
 fi
-
-mkdir -p /usr/local/etc/haproxy/certs
-for site in `ls -1 /etc/letsencrypt/live`; do
-    cat /etc/letsencrypt/live/$site/privkey.pem \
-      /etc/letsencrypt/live/$site/fullchain.pem \
-      | tee /usr/local/etc/haproxy/certs/haproxy-"$site".pem >/dev/null
-done
-
 exit 0
