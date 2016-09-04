@@ -44,9 +44,11 @@ frontend stats
 
 ### Consul-configured backend services ###
 {{ range services }}{{if .Tags | contains "public" }}
-backend {{ .Name }}_backend
-{{ if .Tags.Contains "tcp" }}   mode tcp
-{{else}}   mode http{{ end }}
+backend {{ .Name }}_backend{{ if .Tags.Contains "tcp" }}
+   mode tcp{{else}}
+   http-request set-header X-Forwarded-Port %[dst_port]
+   http-request add-header X-Forwarded-Proto https if { ssl_fc }
+   mode http{{ end }}
 {{ range service .Name }}   server {{ .Node }}-{{ .Port }} {{ .Address }}:{{ .Port }}{{ end }}{{ end }}{{ end }}
 
 {{ if env "HAPROXY_STATS" }}
