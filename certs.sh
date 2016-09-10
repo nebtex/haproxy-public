@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-IFS=',' read -r -a array <<< "$CERTS"
-
-for element in "${array[@]}"
-do
-   certbot certonly --no-self-upgrade -n --text --standalone  --standalone-supported-challenges http-01 -d "$element" --keep --agree-tos --email "$EMAIL"
-done
+if [ -n "$CERTS" ]; then
+    certbot certonly --no-self-upgrade -n --text --standalone \
+        --standalone-supported-challenges http-01 \
+        -d "$CERTS" --keep --agree-tos --email "$EMAIL" \
+        || exit 1
+fi
+exit 0
