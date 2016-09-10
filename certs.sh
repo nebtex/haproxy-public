@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-all_domains=`echo $CERTS | sed  's/,/ -d /g'`
+IFS=',' read -r -a array <<< "$CERTS"
 
-echo "certbot certonly --no-self-upgrade -n --text --standalone  --standalone-supported-challenges http-01 -d $all_domains --keep --agree-tos --email $EMAIL"
-
-if [ -n "$CERTS" ]; then
-    eval "$(certbot certonly --no-self-upgrade -n --text --standalone  --standalone-supported-challenges http-01  -d $all_domains --keep --agree-tos --email $EMAIL)"
-fi
+for element in "${array[@]}"
+do
+   certbot certonly --no-self-upgrade -n --text --standalone  --standalone-supported-challenges http-01 -d "$element" --keep --agree-tos --email "$EMAIL"
+done
