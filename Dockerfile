@@ -78,9 +78,12 @@ RUN cd / && curl -SL "http://www.haproxy.org/download/${HAPROXY_MAJOR}/src/hapro
 	&& cp -R /usr/src/haproxy/examples/errorfiles /usr/local/etc/haproxy/errors \
 	&& rm -rf /usr/src/haproxy
 
+COPY run_consul_template.sh /
 COPY docker-entrypoint.sh /
+
 ADD reload.sh /
 RUN chmod +x reload.sh
+RUN chmod +x run_consul_template.sh
 
 # See https://github.com/janeczku/haproxy-acme-validation-plugin
 COPY haproxy-acme-validation-plugin/acme-http01-webroot.lua /usr/local/etc/haproxy/
