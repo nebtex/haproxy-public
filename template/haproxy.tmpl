@@ -1,5 +1,5 @@
 global
-    maxconn 256
+    maxconn 2048
     lua-load /usr/local/etc/haproxy/acme-http01-webroot.lua
     chroot /jail
     ssl-default-bind-ciphers AES256+EECDH:AES256+EDH:!aNULL;
